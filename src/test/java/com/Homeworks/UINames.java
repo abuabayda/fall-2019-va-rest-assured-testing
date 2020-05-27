@@ -1,4 +1,4 @@
-package com.Practice;
+package com.Homeworks;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;

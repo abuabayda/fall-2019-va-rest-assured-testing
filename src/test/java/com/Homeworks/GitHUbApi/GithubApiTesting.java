@@ -1,4 +1,4 @@
-package com.Practice.GitHUbApi;
+package com.Homeworks.GitHUbApi;
 
 import io.restassured.path.json.JsonPath;
 
