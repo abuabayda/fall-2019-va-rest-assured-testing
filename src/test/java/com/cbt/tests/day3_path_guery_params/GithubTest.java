@@ -1,4 +1,4 @@
-package com.cbt.day3_path_guery_params;
+package com.cbt.tests.day3_path_guery_params;
 
 import static io.restassured.RestAssured.*;
 

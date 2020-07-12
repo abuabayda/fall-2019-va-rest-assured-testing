@@ -7,7 +7,7 @@ import com.cbt.pojos.Spartan;
 import com.github.javafaker.Faker;
 import io.restassured.http.ContentType;
 import io.restassured.matcher.RestAssuredMatchers;
-import io.restassured.module.jsv.JsonSchemaValidator;
+import static io.restassured.module.jsv.JsonSchemaValidator.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,11 +36,11 @@ public class SchemaValidationTests {
         given().
              pathParams("id", 44).
         when().
-         get("/spartans/{id}").prettyPeek().
+             get("/spartans/{id}").prettyPeek().
        then().
              statusCode(200).
              //matchesJasonSchemaInClassPath -->verifies that response body matches the schema in test/resources folder
-                  body(JsonSchemaValidator.matchesJsonSchemaInClasspath("spartan-schema.json"));
+                  body(matchesJsonSchemaInClasspath("spartan-schema.json"));
     }
 
     @Test
@@ -53,7 +53,7 @@ public class SchemaValidationTests {
              get("/spartans/{id}").prettyPeek().
         then().
              statusCode(200).
-             body(JsonSchemaValidator.matchesJsonSchema(file));
+             body(matchesJsonSchema(file));
     }
 
     @Test
@@ -64,15 +64,15 @@ public class SchemaValidationTests {
         Faker faker = new Faker();
         String gender = faker.bool().bool() ? "Male" : "Female";
         Spartan spartan = new Spartan(faker.name().firstName(), gender, faker.number().digits(10));
-
-        given().
-             contentType(ContentType.JSON).
-             body(spartan).
-        when().
-             post("/spartans").prettyPeek().
-        then().
-             statusCode(201).
-             body(JsonSchemaValidator.matchesJsonSchemaInClasspath("post-spartan-schema.json"));
+//
+//        given().
+//             contentType(ContentType.JSON).
+//             body(spartan).
+//        when().
+//             post("/spartans").prettyPeek().
+//        then().
+//             statusCode(201).
+//             body("post-spartan-schema.json"));
     }
 
     @Test

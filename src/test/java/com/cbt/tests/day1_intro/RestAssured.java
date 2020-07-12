@@ -1,7 +1,6 @@
-package com.cbt.day1_intro;
+package com.cbt.tests.day1_intro;
 
 import static io.restassured.RestAssured.*;
-import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;

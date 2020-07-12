@@ -1,5 +1,7 @@
-package com.cbt.day5_authentication_authorization;
+package com.cbt.tests.day5_authentication_authorization;
 import static io.restassured.RestAssured.*;
+
+import com.DBUtil.ConfigReader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -7,20 +9,19 @@ public class TokenAuthentication {
 
   @BeforeAll
   public static void setup(){
-    baseURI = "http://library2.cybertekschool.com/rest/v1";
-  }
+    baseURI = ConfigReader.getProperty("library2_base_url");}
 
   @Test
   public void tokenAuthentication(){
     //get token from login method
-    String  token = given().log().all().
+    String  token = given().log().ifValidationFails().
          formParam("email", "student27@library").
          formParam("password", "kkMksO2i").
          when().post("/login").jsonPath().getString("token");
 
     given().
          header("x-library-token",token).
-         log().all()
+         log().ifValidationFails()
          .when().
    get("/get_book_categories").prettyPeek().then().statusCode(200);
   }
@@ -31,7 +32,7 @@ public class TokenAuthentication {
    */
   @Test
   public void getTokenAddBook(){
-    String token = given().log().all().
+    String token = given().log().ifValidationFails().
          formParam("email", "student27@library").
          formParam("password", "kkMksO2i").
                   when().

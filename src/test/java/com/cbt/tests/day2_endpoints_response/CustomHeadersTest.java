@@ -1,4 +1,4 @@
-package com.cbt.day2_endpoints_response;
+package com.cbt.tests.day2_endpoints_response;
 
 import static io.restassured.RestAssured.*;
 

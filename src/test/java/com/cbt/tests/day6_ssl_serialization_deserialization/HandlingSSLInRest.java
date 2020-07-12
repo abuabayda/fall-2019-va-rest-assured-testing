@@ -1,4 +1,4 @@
-package com.cbt.day6_ssl_serialization_deserialization;
+package com.cbt.tests.day6_ssl_serialization_deserialization;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,5 @@
-package com.cbt.tests.More_Serial;
+package com.cbt.tests.day8_More_Serial;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.*;

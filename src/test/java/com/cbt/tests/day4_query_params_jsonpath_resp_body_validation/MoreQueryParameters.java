@@ -1,4 +1,5 @@
-package com.cbt.day4_query_params_jsonpath_resp_body_validation;
+package com.cbt.tests.day4_query_params_jsonpath_resp_body_validation;
+import com.DBUtil.DBUtility;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.*;
@@ -21,7 +22,7 @@ public class MoreQueryParameters {
   public void symbolsTest(){
     given().
          queryParam("symbols","USD").
-         log().all().
+         log().ifValidationFails().
          when().
          get("/latest").
          prettyPeek().
@@ -58,11 +59,12 @@ public class MoreQueryParameters {
     params.put("symbols","USD,GBP");
 
     given().
-         log().all().
+         log().ifValidationFails().
      when().
          get("/latest").
          prettyPeek().
      then().statusCode(200);
+    DBUtility.closeConnection();
   }
 
   /*

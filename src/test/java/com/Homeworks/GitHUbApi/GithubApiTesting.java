@@ -1,17 +1,17 @@
 package com.Homeworks.GitHUbApi;
-
-import io.restassured.path.json.JsonPath;
+import static org.hamcrest.Matchers.*;
+import static io.restassured.RestAssured.*;
 
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.util.*;
-
-import static io.restassured.RestAssured.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class GithubApiTesting {
   @BeforeAll
@@ -30,16 +30,27 @@ public class GithubApiTesting {
  */
     Response response = given().pathParams("org", "cucumber").when().
          get("/orgs/{org}");
-    JsonPath jsonPath = response.jsonPath();
-    String login = jsonPath.getString("login");
-    String name = jsonPath.getString("name");
-    String id = jsonPath.getString("id");
-    System.out.println(response.prettyPeek());
-    assertThat(response.statusCode(), is(200));
-    assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
-    assertThat(login, equalTo("cucumber"));
-    assertThat(name, equalTo("Cucumber"));
-    assertThat(id, is("320565"));
+    //one option to store string value from json file by its reference
+//    JsonPath jsonPath = response.jsonPath();
+//    String login = jsonPath.getString("login");
+//    String name = jsonPath.getString("name");
+//    String id = jsonPath.getString("id");
+//    System.out.println(response.prettyPeek());
+//    assertThat(response.statusCode(), is(200));
+//    assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
+//    assertThat(login, equalTo("cucumber"));
+//    assertThat(name, equalTo("Cucumber"));
+//    assertThat(id, is("320565"));
+    // or using body() and then provide var name
+    response.
+         then().
+         assertThat().
+                statusCode(200).
+                contentType("application/json; charset=utf-8").
+                body("login",is("cucumber")).
+                body("name",equalToIgnoringCase("cucumber")).
+                body("id",is(320565));
+
   }
 
   @Test
@@ -55,10 +66,17 @@ public class GithubApiTesting {
          header("Accept", "application/xml").
          pathParams("org", "cucumber").
          when().get("/orgs/{org}");
-    System.out.println(response.prettyPeek());
-    assertThat(response.statusCode(), is(415));
-    assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
-    Assertions.assertTrue(response.statusLine().contains("Unsupported Media Type"));
+//    assertThat(response.statusCode(), is(415));
+//    assertThat(response.getContentType(), equalTo("application/json; charset=utf-8"));
+//    Assertions.assertTrue(response.statusLine().contains("Unsupported Media Type"));
+      response.
+           then().
+                  assertThat().
+                      statusCode(415).
+                      contentType("application/json; charset=utf-8").
+                      statusLine(containsString("Unsupported Media Type"));
+
+
   }
 
   /*
@@ -76,17 +94,21 @@ public class GithubApiTesting {
          when().get("/orgs/{org}");
     System.out.println("response " + response.prettyPeek());
 
-    JsonPath jasonPath = response.jsonPath();
-    String public_repos = jasonPath.getString("public_repos");
-    assertThat(public_repos, equalTo("90"));
+        response.then().
+             assertThat().
+                  body("public_repos",is(90));
 
-    response = given().pathParams("org", "cucumber").
-         queryParam("per_page", "100").
-         when().get("/orgs/{org}/repos").prettyPeek();
+    int public_repos = response.jsonPath().getInt("public_repos");
 
-    List<Object> list = response.jsonPath().getList("owner.id");
+    Response response2 = given().
+                                 pathParams("org", "cucumber").
+                                 queryParam("per_page", "100").
+                         when().
+                                 get("/orgs/{org}/repos").prettyPeek();
 
-    assertThat(Integer.parseInt(public_repos), equalTo(list.size()));
+    response2.then().
+                assertThat().
+                      body("size()",is(public_repos));
 
 
   }
@@ -101,30 +123,22 @@ public class GithubApiTesting {
   @Test
   public void numOfId() {
     // first ids
-    Response response = given().pathParams("org", "cucumber")
-         .when().get("/orgs/{org}/repos").prettyPeek();
-    //getting ids
-    JsonPath jasonPath = response.jsonPath();
-    List<Integer> ids = jasonPath.getList("id");
-    assertThat(ids.size(), is(30));
+    Response response =
+         given().
+              queryParams("per_page",100).
+              pathParam("org","cucumber").
+         when().
+              get("/orgs/{org}/repos").prettyPeek();
 
-    //verifying ids are unique
-    Set<Integer> uniqueIds = new LinkedHashSet<>();
-    uniqueIds.addAll(ids);
-    System.out.println(uniqueIds);
-    Assertions.assertTrue(uniqueIds.containsAll(ids));
+    List<Integer> idList = response.jsonPath().getList("id");
+    List<String> nodeIDList = response.jsonPath().getList("node_id");
 
-    //second node_id
-    response = given().pathParams("org", "cucumber").
-         when().get("/orgs/{org}/repos").prettyPeek();
-    jasonPath = response.jsonPath();
-    //getting node_ids
-    List<Integer> node_id = jasonPath.getList("node_id");
-    //remove dupicate and checking if they're unique
-    Set<Integer> uniqueNodeId = new LinkedHashSet<Integer>();
-    uniqueNodeId.addAll(node_id);
-    //compare if they are same
-    Assertions.assertTrue(node_id.containsAll(uniqueNodeId));
+    Set<Integer>idSet = new HashSet<>(idList);
+
+    Set<String>nodeIDSet = new HashSet<>(nodeIDList);
+
+    assertEquals(idList.size(),idSet.size());
+    assertEquals(nodeIDList.size(),nodeIDSet.size());
 
   }
 
@@ -140,27 +154,22 @@ public class GithubApiTesting {
   @Test
   public void repoOwnerInfo() {
     //sending a request
-    Response response = given().pathParams("org", "cucumber").
-         when().get("/orgs/{org}");
+    Response response =
+         given().
+              pathParam("org","cucumber").
+              when().
+              get("/orgs/{org}").prettyPeek();
+    int id = response.jsonPath().getInt("id");
 
-    //grab value of ids
-    JsonPath jsonPath = response.jsonPath();
-    String ids = jsonPath.getString("id");
-    System.out.println("ids = " + ids);
-
-    //
-    response = given().pathParams("org", "cucumber").
-         queryParam("owner", "id").
-         when().get("/orgs/{org}/repos");
-    jsonPath = response.jsonPath();
-
-    //getting each owner id in all repos owner
-    List<Integer> innerIds = jsonPath.getList("owner.id");
-    System.out.println("innerIds = " + innerIds);
-    //verify all owner ids equal first id
-    for (int i = 0; i <= innerIds.size() - 1; i++) {
-      assertThat(innerIds.get(i), is(Integer.parseInt(ids)));
-    }
+    Response response2 =
+         given().
+              queryParams("per_page",100).
+              pathParam("org","cucumber").
+              when().
+              get("/orgs/{org}/repos").prettyPeek();
+    response2.then().
+         assertThat().
+         body("owner.id",everyItem(is(id)));
   }
   /*
   Ascending order by full_name sort
@@ -172,21 +181,17 @@ public class GithubApiTesting {
   @Test
   public void AscOrdFullName(){
     Response response = given().
-         pathParams("org", "cucumber").
-         queryParam("sort","full_name").
-         when().get("/orgs/{org}/repos");
+                                 pathParams("org", "cucumber").
+                                 queryParam("sort","full_name").
+                        when().
+                                 get("/orgs/{org}/repos");
 
-//    System.out.println(response.prettyPeek());
 
-    JsonPath jsonPath = response.jsonPath();
-    List<Map<String,Object>> listNames = jsonPath.getList("full_name");
-//    System.out.println("Full Name: " + listNames);
+    List<String> listNames = response.jsonPath().getList("full_name");
+    List<String> sorted = new ArrayList<>(listNames);
+    Collections.sort(sorted);
 
-    System.out.println();
-    List<Map<String, Object>> sorted = new ArrayList<>();
-    sorted.addAll(listNames);
 
-//    System.out.println("sorted = " + sorted);
     assertThat(sorted,equalTo(listNames));
   }
 
@@ -200,6 +205,7 @@ public class GithubApiTesting {
 name
    */
   @Test
+  @DisplayName("Descending order by full_name sort")
   public void descOrdFullName(){
     Response response = given().
          pathParams("org", "cucumber").
@@ -207,12 +213,13 @@ name
          queryParam("direction", "desc").
          when().
          get("/orgs/{org}/repos");
-   JsonPath jsonPath = response.jsonPath();
-    List<Map<String,Object>> name = jsonPath.getList("name");
-    System.out.println("name = " + name);
+
+
+    List<String> name = response.jsonPath().getList("full_name");
+//    System.out.println("name = " + name);
     
-    List<Map<String,Object>> reversed = new ArrayList<>();
-    reversed.addAll(name);
+    List<String> reversed = new ArrayList<>(name);
+    Collections.sort(reversed,Collections.reverseOrder());
 
     assertThat(reversed,equalTo(name));
   }
@@ -230,13 +237,11 @@ created_at
          when().
          get("/orgs/{org}/repos");
 
-    JsonPath jsonPath = response.jsonPath();
-    List<Map<String,Object>> created_at = jsonPath.getList("created_at");
-    System.out.println("created_at = " + created_at);
+    List<String> dates = response.jsonPath().getList("created_at");
 
-    List<Map<String,Object>> desc = new ArrayList<>();
-    desc.addAll(created_at);
+    List<String> desc = new ArrayList<>(dates);
+    Collections.sort(desc,Collections.reverseOrder());
 
-    assertThat(desc,equalTo(created_at));
+    assertThat(desc,equalTo(dates));
   }
 }

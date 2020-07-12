@@ -124,7 +124,8 @@ public class LibraryCreateUserTests {
         //update user information
 
         String newName = new Faker().name().fullName();
-       request = given().header("x-library-token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjp7ImlkIjoiMTY0IiwiZnVsbF9uYW1lIjoiVGVzdCBMaWJyYXJpYW4gMTYiLCJlbWFpbCI6ImxpYnJhcmlhbjE2QGxpYnJhcnkiLCJ1c2VyX2dyb3VwX2lkIjoiMiJ9LCJpYXQiOjE1OTA5NTgwOTcsImV4cCI6MTU5MzU1MDA5N30.RE56pSRGjKNsbcGPbPjkncX-v_k2d6pMVAqV127lxbE");
+       request = given().
+            header("x-library-token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjp7ImlkIjoiMTY0IiwiZnVsbF9uYW1lIjoiVGVzdCBMaWJyYXJpYW4gMTYiLCJlbWFpbCI6ImxpYnJhcmlhbjE2QGxpYnJhcnkiLCJ1c2VyX2dyb3VwX2lkIjoiMiJ9LCJpYXQiOjE1OTA5NTgwOTcsImV4cCI6MTU5MzU1MDA5N30.RE56pSRGjKNsbcGPbPjkncX-v_k2d6pMVAqV127lxbE");
        request.
                 formParam("full_name",newName).
                 pathParams("",id).
